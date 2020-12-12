@@ -15,7 +15,42 @@ class Provider extends AbstractProvider
     /**
      * {@inheritdoc}
      */
-    protected $scopes = [];
+    protected $scopes = null;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCodeFields($state = null)
+    {
+        $fields = [
+            'client_id' => $this->clientId,
+            'redirect_uri' => $this->redirectUrl,
+            'response_type' => 'code',
+        ];
+
+        if ($this->usesState()) {
+            $fields['state'] = $state;
+        }
+
+        return array_merge($fields, $this->parameters);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAccessTokenResponse($code)
+    {
+        $response = $this->getHttpClient()->post($this->getTokenUrl(), [
+            'headers' => [
+                'Accept' => 'application/json',
+                'User-Agent' => env('APP_NAME'),
+                'X-SparkApi-User-Agent' => 'ThinkerySocialite',
+            ],
+            'form_params' => $this->getTokenFields($code),
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
 
     /**
      * {@inheritdoc}
@@ -41,7 +76,7 @@ class Provider extends AbstractProvider
         $response = $this->getHttpClient()->get('https://sparkapi.com/v1/my/account', [
             'headers' => [
                 'Authorization' => 'Bearer '.$token,
-                'User-Agent' => 'ThinkerySocialite',
+                'User-Agent' => env('APP_NAME'),
                 'X-SparkApi-User-Agent' => 'ThinkerySocialite',
             ],
         ]);
@@ -54,12 +89,11 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
-        return (new User())->setRaw($user)->map([
-            'id'       => $user['id'],
-            'nickname' => $user['username'],
-            'name'     => $user['name'],
-            'email'    => $user['email'],
-            'avatar'   => $user['avatar'],
+        $profile = $user['D']['Results'][0];
+        return (new User())->setRaw($profile)->map([
+            'id'       => $profile['Id'],
+            'name'     => $profile['Name'],
+            'email'    => $profile['Emails'][0]['Address'],
         ]);
     }
 
