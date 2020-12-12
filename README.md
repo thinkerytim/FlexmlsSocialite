@@ -42,6 +42,8 @@ You should now be able to use the provider like you would regularly use Socialit
 return Socialite::driver('flexmls')->redirect();
 ```
 
+Note that [ALL requests made to the Spark API](https://sparkplatform.com/docs/api_services/read_first) are required to have an `X-SparkApi-User-Agent` header present, or the request will fail with a `400` error.
+
 ### Returned User fields
 
 - ``id``
