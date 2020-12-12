@@ -41,8 +41,8 @@ class Provider extends AbstractProvider
         $response = $this->getHttpClient()->get('https://sparkapi.com/v1/my/account', [
             'headers' => [
                 'Authorization' => 'Bearer '.$token,
-                'User-Agent' => 'Socialite',
-                'X-SparkApi-User-Agent' => 'Socialite',
+                'User-Agent' => 'ThinkerySocialite',
+                'X-SparkApi-User-Agent' => 'ThinkerySocialite',
             ],
         ]);
 
